@@ -49,6 +49,9 @@ class Node:
     def reset(self):
         self.color == WHITE
     
+    def make_start(self):
+        self.color = ORANGE
+
     def make_closed(self):
         self.color = RED
     
@@ -89,3 +92,73 @@ def make_grid(rows, width):
             grid[i].append(node)
 
     return grid
+
+def draw_grid(win, rows, width):
+    gap = width // rows
+    for i in range(rows):
+        pygame.draw.line(win, GREY, (0, i*gap) , (width, i*gap))  
+        for j in range(rows):
+            pygame.draw.line(win, GREY, (j*gap, 0) , (j*gap, width))
+
+
+def draw(win, grid, rows, width):
+    win.fill(WHITE)
+
+    for row in grid:
+        for node in row:
+            node.draw(win)
+    
+    draw_grid(win, rows, width)
+    pygame.display.update()
+
+def get_clicked_pos(pos, rows, width):
+    gap = width // rows
+    x, y = pos
+
+    row = x // gap
+    col = y // gap
+
+    return row, col
+
+
+def main(win, width):
+    ROWS = 50
+    # ROWS = int(input("Enter how many rows you want: ")) if ROWS is None else ROWS
+    grid = make_grid(ROWS, width)
+
+    start = None
+    end = None
+
+    run = True
+    started = False
+
+    while run:
+        draw(win, grid, ROWS, width)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            
+            if started:
+                continue
+
+            if pygame.mouse.get_pressed()[0]: # left mouse button
+                pos = pygame.mouse.get_pos()
+                row, col = get_clicked_pos(pos, ROWS, width)
+                node = grid[row][col]
+                if start is None:
+                    start = node
+                    start.make_start()
+                elif end is None:
+                    end = node
+                    end.make_end()
+                elif node != start and node != end:
+                    node.make_obstacle()
+
+
+            elif pygame.mouse.get_pressed()[2]: # right mouse button
+                pass
+
+    
+    pygame.quit()
+
+main(WIN, WIDTH)
